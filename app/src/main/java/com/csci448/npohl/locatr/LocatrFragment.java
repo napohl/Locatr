@@ -39,7 +39,7 @@ public class LocatrFragment extends Fragment {
 
                     @Override
                     public void onConnectionSuspended(int i) {
-                        
+
                     }
                 }).build();
     }
