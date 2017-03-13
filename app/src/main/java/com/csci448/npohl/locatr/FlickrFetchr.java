@@ -1,5 +1,6 @@
 package com.csci448.npohl.locatr;
 
+import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
 
@@ -23,13 +24,15 @@ public class FlickrFetchr {
 
     private static final String TAG = "FlickrFetchr";
     private static final String API_KEY = "yourApiKeyHere";
+    private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
+    private static final String SEARCH_METHOD = "flick.photos.search";
     private static final Uri ENDPOINT = Uri
             .parse("https://api.flickr.com/services/rest/")
             .buildUpon()
             .appendQueryParameter("api_key", API_KEY)
             .appendQueryParameter("format", "json")
             .appendQueryParameter("nojsoncallback", "1")
-            .appendQueryParameter("extras", "url_s")
+            .appendQueryParameter("extras", "url_s,geo")
             .build();
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -57,7 +60,20 @@ public class FlickrFetchr {
         }
     }
 
-    String getUrlString(String urlSpec) throws IOException {
+    private String buildUrl(Location location) {
+        return ENDPOINT.buildUpon()
+                .appendQueryParameter("method", SEARCH_METHOD)
+                .appendQueryParameter("lat", "" + location.getLatitude())
+                .appendQueryParameter("lon", "" + location.getLongitude())
+                .build().toString();
+    }
+
+    public List<GalleryItem> searchPhotos(Location location) {
+        String url = buildUrl(location);
+        return downloadGalleryItems(url);
+    }
+
+    public String getUrlString(String urlSpec) throws IOException {
         return new String(getUrlBytes(urlSpec));
     }
 
@@ -73,7 +89,7 @@ public class FlickrFetchr {
                     .appendQueryParameter("safe_search", "1")
                     .build().toString();
             String jsonString = getUrlString(url);
-            Log.i(TAG, "Recieved JSON: " + jsonString);
+            Log.i(TAG, "Recei ved JSON: " + jsonString);
         }
         catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items: ", ioe);
@@ -98,6 +114,8 @@ public class FlickrFetchr {
             }
 
             item.setUrl(photoJsonObject.getString("url_s"));
+            item.setLat(photoJsonObject.getDouble("latitude"));
+            item.setLon(photoJsonObject.getDouble("longitude"));
             items.add(item);
         }
     }

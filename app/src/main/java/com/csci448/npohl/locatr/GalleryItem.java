@@ -8,6 +8,8 @@ public class GalleryItem {
     private String mCaption;
     private String mId;
     private String mUrl;
+    private double mLat;
+    private double mLon;
 
     @Override
     public String toString() {
@@ -36,5 +38,21 @@ public class GalleryItem {
 
     public void setUrl(String url) {
         mUrl = url;
+    }
+
+    public double getLat() {
+        return mLat;
+    }
+
+    public void setLat(double mLat) {
+        this.mLat = mLat;
+    }
+
+    public double getLon() {
+        return mLon;
+    }
+
+    public void setLon(double mLon) {
+        this.mLon = mLon;
     }
 }
