@@ -1,10 +1,14 @@
 package com.csci448.npohl.locatr;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,9 +53,9 @@ public class LocatrFragment extends SupportMapFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
-        mClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API)
+        mClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
                     public void onConnected(Bundle bundle) {
@@ -62,7 +66,8 @@ public class LocatrFragment extends SupportMapFragment {
                     public void onConnectionSuspended(int i) {
 
                     }
-                }).build();
+                })
+                .build();
 
         getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -71,6 +76,9 @@ public class LocatrFragment extends SupportMapFragment {
                 updateUI();
             }
         });
+
+        checkPermission();
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -126,6 +134,16 @@ public class LocatrFragment extends SupportMapFragment {
         }
         catch (SecurityException se) {
             Log.e(TAG, "Failed to get permission: ", se);
+        }
+    }
+
+    public void checkPermission() {
+        Log.d(TAG, "checkPermission()");
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this.getContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            Log.d(TAG, "Requesting Permission");
+            ActivityCompat.requestPermissions(this.getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
         }
     }
 

@@ -23,9 +23,9 @@ import java.util.List;
 public class FlickrFetchr {
 
     private static final String TAG = "FlickrFetchr";
-    private static final String API_KEY = "yourApiKeyHere";
+    private static final String API_KEY = "a96b983aa32bf4373e70ecc1b95f38c2";
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
-    private static final String SEARCH_METHOD = "flick.photos.search";
+    private static final String SEARCH_METHOD = "flickr.photos.search";
     private static final Uri ENDPOINT = Uri
             .parse("https://api.flickr.com/services/rest/")
             .buildUpon()
@@ -77,23 +77,22 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public void fetchItems() {
+    private List<GalleryItem> downloadGalleryItems(String url) {
+        List<GalleryItem> items = new ArrayList<>();
         try {
-            String url = Uri.parse("https://api.flickr.com/services/rest/")
-                    .buildUpon()
-                    .appendQueryParameter("method", "flickr.photos.getRecent")
-                    .appendQueryParameter("api_key", API_KEY)
-                    .appendQueryParameter("format", "json")
-                    .appendQueryParameter("nojsoncallback", "1")
-                    .appendQueryParameter("extras", "url_s")
-                    .appendQueryParameter("safe_search", "1")
-                    .build().toString();
             String jsonString = getUrlString(url);
-            Log.i(TAG, "Recei ved JSON: " + jsonString);
+            Log.i(TAG, "Received JSON: " + jsonString);
+            JSONObject jsonBody = new JSONObject(jsonString);
+            parseItems(items, jsonBody);
+        }
+        catch (JSONException je) {
+            Log.e(TAG, "Failed to parse JSON", je);
         }
         catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items: ", ioe);
         }
+
+        return items;
     }
 
     private void parseItems(List<GalleryItem> items, JSONObject jsonBody)
@@ -118,24 +117,5 @@ public class FlickrFetchr {
             item.setLon(photoJsonObject.getDouble("longitude"));
             items.add(item);
         }
-    }
-
-    private List<GalleryItem> downloadGalleryItems(String url) {
-        List<GalleryItem> items = new ArrayList<>();
-
-        try {
-            String jsonString = getUrlString(url);
-            Log.i(TAG, "Received JSON: " + jsonString);
-            JSONObject jsonBody = new JSONObject(jsonString);
-            parseItems(items, jsonBody);
-        }
-        catch (IOException ioe) {
-            Log.e(TAG, "Failed to fetch items", ioe);
-        }
-        catch (JSONException je) {
-            Log.e(TAG, "Failed to parse JSON", je);
-        }
-
-        return items;
     }
 }
